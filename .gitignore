@@ -32,3 +32,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### internal log ###
+account-manager-cli.log
