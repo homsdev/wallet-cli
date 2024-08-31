@@ -7,4 +7,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResourceNotCreatedException extends RuntimeException {
     private String message;
+
+    public String getMessage() {
+        return message;
+    }
 }
