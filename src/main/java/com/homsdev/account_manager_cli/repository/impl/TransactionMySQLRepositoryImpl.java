@@ -1,22 +1,22 @@
 package com.homsdev.account_manager_cli.repository.impl;
 
-import com.homsdev.account_manager_cli.model.TRANSACTION_TYPE;
 import com.homsdev.account_manager_cli.model.Transaction;
 import com.homsdev.account_manager_cli.repository.TransactionRepository;
-import com.homsdev.account_manager_cli.utils.TransactionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.homsdev.account_manager_cli.repository.mappers.TransactionRowMapper;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-//TODO: Create a rowMapper for transactions
 @Repository
+@RequiredArgsConstructor
 public class TransactionMySQLRepositoryImpl implements TransactionRepository {
 
     @Value("${transaction.save}")
@@ -31,11 +31,6 @@ public class TransactionMySQLRepositoryImpl implements TransactionRepository {
     private String deleteTransactionQuery;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public TransactionMySQLRepositoryImpl(NamedParameterJdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Optional<Transaction> saveTransaction(Transaction transaction) {
@@ -53,42 +48,15 @@ public class TransactionMySQLRepositoryImpl implements TransactionRepository {
     public List<Transaction> findAllByAccountId(String accountId) {
         Map<String, Object> params = new HashMap<>();
         params.put("accountId", accountId);
-        return jdbcTemplate.query(findAllByAccountIdTransactionQuery, params, (rs, rowNum) -> {
-            TRANSACTION_TYPE type = TransactionUtils
-                    .transactionTypeParse(rs.getString("transaction_type"));
-
-            LocalDate transactionDate = LocalDate
-                    .parse(rs.getString("transaction_date"));
-
-            return Transaction.builder()
-                    .transactionId(rs.getString("transaction_id"))
-                    .amount(rs.getBigDecimal("transaction_amount"))
-                    .type(type)
-                    .date(transactionDate)
-                    .account(null)
-                    .build();
-        });
+        return jdbcTemplate.query(findAllByAccountIdTransactionQuery, params, new TransactionRowMapper());
     }
 
     @Override
     public Optional<Transaction> findById(String transactionId) {
         Map<String, Object> params = new HashMap<>();
         params.put("transactionId", transactionId);
-        List<Transaction> transaction = jdbcTemplate.query(findByIdTransactionQuery, params, (rs, rowNum) -> {
-            TRANSACTION_TYPE type = TransactionUtils
-                    .transactionTypeParse(rs.getString("transaction_type"));
-
-            LocalDate transactionDate = LocalDate
-                    .parse(rs.getString("transaction_date"));
-
-            return Transaction.builder()
-                    .transactionId(rs.getString("transaction_id"))
-                    .amount(rs.getBigDecimal("transaction_amount"))
-                    .type(type)
-                    .date(transactionDate)
-                    .account(null)
-                    .build();
-        });
+        List<Transaction> transaction = jdbcTemplate.query(findByIdTransactionQuery, params,
+                new TransactionRowMapper());
         return transaction.stream().findFirst();
     }
 
