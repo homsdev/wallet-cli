@@ -9,6 +9,9 @@ import org.springframework.shell.component.support.SelectorItem;
 import org.springframework.shell.standard.AbstractShellComponent;
 import org.springframework.stereotype.Component;
 
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -95,6 +98,31 @@ public class ShellTerminalComponent extends AbstractShellComponent {
                 .orElseGet(() -> "");
 
         return selectedValue;
+    }
+
+    public Optional<LocalDate> readDateTypeInput(String instruction) {
+        LocalDate now = LocalDate.now();
+        String year = readSimpleTextInput("Year:", String.valueOf(now.getYear()));
+        LinkedHashMap<String, String> months = new LinkedHashMap<>();
+        for (int index = 0; index < Month.values().length; index++) {
+            months.put(String.valueOf(index + 1), Month.values()[index].toString());
+        }
+        String month = readMultipleSelectionInput("Select month", months);
+
+        String day = readSimpleTextInput("Day", "01");
+
+        LocalDate inputDate = null;
+
+        try {
+            Integer y = Integer.valueOf(year);
+            Integer m = Integer.valueOf(month);
+            Integer d = Integer.valueOf(day);
+            inputDate = LocalDate.of(y, m, d);
+        } catch (DateTimeException e) {
+            printErrorMessage("Invalid date");
+        }
+
+        return Optional.ofNullable(inputDate);
     }
 
 }

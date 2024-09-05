@@ -1,6 +1,5 @@
 package com.homsdev.account_manager_cli.command;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -61,8 +60,10 @@ public class TransactionCommands {
                 transactionTypeItems);
 
         // Capture transaction date
-        String inputDate = terminalComponent.readSimpleTextInput("Capture Date ()", TODAY.toString());
-        LocalDate transactionDate = LocalDate.parse(inputDate);
+        LocalDate transactionDate = null;
+        while (transactionDate == null) {
+            transactionDate = terminalComponent.readDateTypeInput("Capture date").orElse(null);
+        }
 
         // Generate UUID
         String transactionId = UUID.randomUUID().toString();
