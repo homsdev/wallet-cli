@@ -1,7 +1,6 @@
 package com.homsdev.account_manager_cli.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
