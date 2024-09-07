@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransactionCommands {
 
-    private static final LocalDate TODAY = LocalDate.now();
+    private static final LocalDate TODAY = LocalDate.now();// FIXME:Remove unused constant
 
     private static final Integer SCREEN_SIZE = 200;
 
@@ -84,6 +84,25 @@ public class TransactionCommands {
 
         terminalComponent.printSuccessMessage("transaction created");
         terminalComponent.printInfoMessage(transactionTable.render(SCREEN_SIZE));
-
     }
+
+    @ShellMethod(key = "find-t",value = "Gets all transactions by selected Account")
+    public void getAllTransactionsByAccount() {
+        List<Account> allAccounts = accountService.getAllAccounts();
+
+        LinkedHashMap<String, String> options = new LinkedHashMap<>();
+
+        for (Account account : allAccounts) {
+            options.put(account.getAccountId(), account.getAlias());
+        }
+
+        String selectedAccount = terminalComponent.readMultipleSelectionInput("Select account", options);
+
+        List<Transaction> transactions = transactionService.findAllByAccountId(selectedAccount);
+
+        Table transactionsTable = TableUtils.transactionTable(transactions.toArray(new Transaction[0]));
+
+        terminalComponent.printInfoMessage(transactionsTable.render(SCREEN_SIZE));
+    }
+
 }
