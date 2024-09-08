@@ -36,6 +36,7 @@ public class TableUtils {
 
         LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
         headers.put("transactionId", "TRANSACTION ID");
+        headers.put("alias", "ALIAS");
         headers.put("amount", "BALANCE");
         headers.put("type", "TYPE");
         headers.put("date", "DATE");

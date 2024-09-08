@@ -40,6 +40,7 @@ public class TransactionMySQLRepositoryImpl implements TransactionRepository {
         params.put("type", transaction.getType().toString());
         params.put("date", transaction.getDate().toString());
         params.put("accountId", transaction.getAccount().getAccountId());
+        params.put("alias", transaction.getAlias());
         int updated = jdbcTemplate.update(saveTransactionQuery, params);
         return updated > 0 ? Optional.of(transaction) : Optional.empty();
     }

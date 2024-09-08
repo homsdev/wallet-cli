@@ -26,8 +26,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransactionCommands {
 
-    private static final LocalDate TODAY = LocalDate.now();// FIXME:Remove unused constant
-
     private static final Integer SCREEN_SIZE = 200;
 
     private final TransactionService transactionService;
@@ -47,6 +45,9 @@ public class TransactionCommands {
         }
 
         String selectedAccount = terminalComponent.readMultipleSelectionInput("Select account", options);
+
+        //Capture transaction alias
+        String description = terminalComponent.readSimpleTextInput("Capture description", "<<empty>>");
 
         // Capture transaction amount
         String transactionAmount = terminalComponent.readSimpleTextInput("Capture transaction amount", "0.00");
@@ -76,6 +77,7 @@ public class TransactionCommands {
                 .amount(new BigDecimal(transactionAmount))
                 .date(transactionDate)
                 .type(TRANSACTION_TYPE.valueOf(selectedType))
+                .alias(description)
                 .build();
 
         Transaction savedTransaction = transactionService.saveTransaction(newTransaction);

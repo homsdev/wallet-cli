@@ -14,4 +14,5 @@ public class Transaction {
     private TRANSACTION_TYPE type;
     private LocalDate date;
     private Account account;
+    private String alias;
 }

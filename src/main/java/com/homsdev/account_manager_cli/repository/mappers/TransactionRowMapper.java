@@ -31,6 +31,7 @@ public class TransactionRowMapper implements RowMapper<Transaction> {
                 .amount(rs.getBigDecimal("transaction_amount"))
                 .type(type)
                 .date(transaction_date)
+                .alias(rs.getString("transaction_alias"))
                 .account(account).build();
     }
 
