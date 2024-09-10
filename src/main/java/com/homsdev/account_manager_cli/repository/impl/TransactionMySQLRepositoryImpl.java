@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ public class TransactionMySQLRepositoryImpl implements TransactionRepository {
     private String updateTransactionQuery;
     @Value("${transaction.delete}")
     private String deleteTransactionQuery;
+    @Value("${transaction.filterByDate}")
+    private String filterByDateTransactionQuery;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -80,4 +83,14 @@ public class TransactionMySQLRepositoryImpl implements TransactionRepository {
         params.put("transactionId", id);
         return jdbcTemplate.update(deleteTransactionQuery, params);
     }
+
+    @Override
+    public List<Transaction> findByDate(LocalDate from, LocalDate to, String accountId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("accountId", accountId);
+        params.put("fromDate", from);
+        params.put("toDate", to);
+        return jdbcTemplate.query(filterByDateTransactionQuery, params, new TransactionRowMapper());
+    }
+
 }

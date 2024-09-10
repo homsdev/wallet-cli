@@ -1,5 +1,6 @@
 package com.homsdev.account_manager_cli.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -45,6 +46,22 @@ public class TransactionService {
         }
 
         return transactionRepository.deleteTransaction(transactionId);
+    }
+
+    public List<Transaction> filterByDate(LocalDate from, LocalDate to, String accountId) {
+        return transactionRepository.findByDate(from, to, accountId);
+    }
+
+    public List<Transaction> filterByCurrentDay(String accountId) {
+        LocalDate today = LocalDate.now();
+        return transactionRepository.findByDate(today, today, accountId);
+    }
+
+    public List<Transaction> filterByCurrentMonth(String accountId) {
+        LocalDate today = LocalDate.now();
+        LocalDate from = today.withDayOfMonth(1);
+        LocalDate to = today.withDayOfMonth(today.lengthOfMonth());
+        return transactionRepository.findByDate(from, to, accountId);
     }
 
 }
