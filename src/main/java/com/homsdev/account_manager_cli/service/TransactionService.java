@@ -45,7 +45,7 @@ public class TransactionService {
             throw new ResourceNotFoundException("Transaction not deleted");
         }
 
-        return transactionRepository.deleteTransaction(transactionId);
+        return result;
     }
 
     public List<Transaction> filterByDate(LocalDate from, LocalDate to, String accountId) {

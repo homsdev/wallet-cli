@@ -23,7 +23,8 @@ public class ShellTerminalComponent extends AbstractShellComponent {
     private final Terminal terminal;
 
     private final String SUCCESS_MESSAGE = "\033[32m";
-    private final String ERROR_MESSAGE = "\033[31m";
+    private final String ERROR_MESSAGE = "\033[0;31m";
+    private final String BOLD = "\033[1m";
     private final String RESET = "\033[0m";
 
     public ShellTerminalComponent(Terminal terminal) {
@@ -44,17 +45,18 @@ public class ShellTerminalComponent extends AbstractShellComponent {
     public void printInfoMessage(String text) {
         StringBuilder msg = new StringBuilder();
         msg.append(text);
-
         terminal.writer().println(msg);
         terminal.flush();
     }
 
     public void printErrorMessage(String text) {
         StringBuilder msg = new StringBuilder();
+        msg.append(BOLD);
         msg.append(ERROR_MESSAGE);
+        msg.append("Error: ");
         msg.append(text);
         msg.append(RESET);
-        terminal.writer().println(text);
+        terminal.writer().println(msg);
         terminal.flush();
     }
 

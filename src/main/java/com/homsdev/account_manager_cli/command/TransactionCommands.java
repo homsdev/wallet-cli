@@ -12,6 +12,8 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.Table;
 
+import com.homsdev.account_manager_cli.command.ui.ItemSelectorUI;
+import com.homsdev.account_manager_cli.enums.MenuOperation;
 import com.homsdev.account_manager_cli.model.Account;
 import com.homsdev.account_manager_cli.model.TRANSACTION_TYPE;
 import com.homsdev.account_manager_cli.model.Transaction;
@@ -33,6 +35,7 @@ public class TransactionCommands {
     private final AccountService accountService;
 
     private final ShellTerminalComponent terminalComponent;
+    private final ItemSelectorUI itemSelectorUI;
 
     @ShellMethod(key = "save-t", value = "Register a new transaction")
     public void registerTransaction() {
@@ -108,8 +111,8 @@ public class TransactionCommands {
         terminalComponent.printInfoMessage(transactionsTable.render(SCREEN_SIZE));
     }
 
-    @ShellMethod(key = "navigate", value = "Helps to navigate registered transactions for the given account")
-    public void filterTransactions(
+    @ShellMethod(key = "navigate", value = "Helps to navigate registered transactions to operate over them")
+    public void navigateTransactions(
             @ShellOption(defaultValue = "false", value = { "-t",
                     "--today" }, help = "Displays transactions of current day") Boolean today,
             @ShellOption(defaultValue = "false", value = { "-m",
@@ -118,24 +121,18 @@ public class TransactionCommands {
                     "--from" }, help = "Displays transactions of selected month") Integer fromMonth) {
         List<Account> userAccounts = accountService.getAllAccounts();
 
-        LinkedHashMap<String, String> options = new LinkedHashMap<>();
-
-        for (Account account : userAccounts) {
-            options.put(account.getAccountId(), account.getAlias());
-        }
-
-        String selectedAccount = terminalComponent.readMultipleSelectionInput("select account", options);
+        Account selectedAccount = itemSelectorUI.accountItemSelector(userAccounts);
 
         List<Transaction> filteredTransactions = null;
         LocalDate todayDate = LocalDate.now();
-        
+
         if (fromMonth == 0) {
             if (today) {
-                filteredTransactions = transactionService.filterByCurrentDay(selectedAccount);
+                filteredTransactions = transactionService.filterByCurrentDay(selectedAccount.getAccountId());
             } else if (month) {
-                filteredTransactions = transactionService.filterByCurrentMonth(selectedAccount);
+                filteredTransactions = transactionService.filterByCurrentMonth(selectedAccount.getAccountId());
             } else {
-                System.out.println("Invalid Date");
+                terminalComponent.printErrorMessage("No range date option was selected");
                 return;
             }
         } else {
@@ -148,12 +145,54 @@ public class TransactionCommands {
 
             LocalDate to = LocalDate.of(year, fromMonth, lastDay);
 
-            filteredTransactions = transactionService.filterByDate(from, to, selectedAccount);
-            System.out.printf("Searching from %s to %s\n", from, to);
+            filteredTransactions = transactionService.filterByDate(from, to, selectedAccount.toString());
+            terminalComponent.printInfoMessage(String.format("Searching from %s to %s\n", from, to));
         }
 
         Table filteredTransactionsTable = TableUtils.transactionTable(filteredTransactions.toArray(new Transaction[0]));
 
         terminalComponent.printInfoMessage(filteredTransactionsTable.render(SCREEN_SIZE));
+        if (filteredTransactions.size() > 0) {
+            Transaction selectedTransaction = itemSelectorUI.transactionItemSelector(filteredTransactions);
+            terminalComponent
+                    .printInfoMessage(String.format("Operating on transaction %s", selectedTransaction.getAlias()));
+            MenuOperation selectedOperation = itemSelectorUI.operationItemSelector();
+            executeOperation(selectedOperation, selectedTransaction);
+        }
+
     }
+
+    private void executeOperation(MenuOperation operation, Transaction transaction) {
+        switch (operation) {
+            case READ:
+                break;
+            case DELETE:
+                terminalComponent
+                        .printInfoMessage(String.format("Executing operation: %s", operation.name()));
+                deleteTransacion(transaction);
+                break;
+            case UPDATE:
+                terminalComponent
+                        .printInfoMessage(String.format("Executing operation: %s", operation.name()));
+                updateTransaction(transaction);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void deleteTransacion(Transaction transaction) {
+        Integer result = transactionService.deleteTransaction(transaction.getTransactionId());
+        if (result > 0) {
+            terminalComponent.printSuccessMessage("Transaction was deleted");
+        } else {
+            terminalComponent.printErrorMessage("Error when deleting transaction");
+        }
+    }
+
+    private void updateTransaction(Transaction transaction) {
+        terminalComponent.printInfoMessage(String.format("Updating transaction: ", transaction.getAlias()));
+
+    }
+
 }
