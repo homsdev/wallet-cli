@@ -27,9 +27,21 @@ public class AccountMysqlRepositoryImpl implements AccountRepository {
     private String deleteAccountQuery;
     @Value("${account.update}")
     private String updateAccountBalanceQuery;
+    @Value("${account.findById}")
+    private String findAccountByIdQuery;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final AccountRowMapper accountRowMapper;
+
+    @Override
+    public Optional<Account> findById(String id) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("accountId", id);
+        return jdbcTemplate
+                .query(findAccountByIdQuery, params, new AccountRowMapper())
+                .stream()
+                .findFirst();
+    }
 
     @Override
     public List<Account> getAllAccounts() {
