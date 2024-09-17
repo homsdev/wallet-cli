@@ -45,7 +45,7 @@ public class TransactionCommands {
 
     @ShellMethod(key = "save-t", value = "Register a new transaction")
     public void registerTransaction() {
- 
+
         List<Account> userAccounts = accountService.getAllAccounts();
 
         LinkedHashMap<String, String> options = new LinkedHashMap<>();
@@ -153,13 +153,13 @@ public class TransactionCommands {
         Table filteredTransactionsTable = TableUtils.transactionTable(filteredTransactions.toArray(new Transaction[0]));
 
         terminalComponent.printInfoMessage(filteredTransactionsTable.render(SCREEN_SIZE));
-        
+
         if (filteredTransactions.size() > 0) {
             Transaction selectedTransaction = itemSelectorUI.transactionItemSelector(filteredTransactions);
             terminalComponent
                     .printInfoMessage(String.format("Operating on transaction %s", selectedTransaction.getAlias()));
             MenuOperation selectedOperation = itemSelectorUI.operationItemSelector();
-            
+
             executeOperation(selectedOperation, selectedTransaction);
         }
 
@@ -219,7 +219,7 @@ public class TransactionCommands {
         transaction.setType(updatedType);
         transaction.setDate(updatedDate);
 
-        Transaction updatedTransaction = transactionService.updateTransaction(transaction);
+        transactionService.updateTransaction(transaction);
 
         displayUI.printSuccessMessage("Transaction Updated Successfully");
 

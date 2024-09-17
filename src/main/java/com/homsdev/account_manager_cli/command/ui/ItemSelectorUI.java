@@ -16,7 +16,6 @@ import com.homsdev.account_manager_cli.exceptions.InvalidInputException;
 import com.homsdev.account_manager_cli.model.Account;
 import com.homsdev.account_manager_cli.model.TRANSACTION_TYPE;
 import com.homsdev.account_manager_cli.model.Transaction;
-import com.homsdev.account_manager_cli.shell.ShellTerminalComponent;
 
 import lombok.RequiredArgsConstructor;
 
