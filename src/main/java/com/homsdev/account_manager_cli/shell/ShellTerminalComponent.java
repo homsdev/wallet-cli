@@ -9,6 +9,8 @@ import org.springframework.shell.component.support.SelectorItem;
 import org.springframework.shell.standard.AbstractShellComponent;
 import org.springframework.stereotype.Component;
 
+import lombok.RequiredArgsConstructor;
+
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.Month;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class ShellTerminalComponent extends AbstractShellComponent {
 
     private final Terminal terminal;
@@ -26,10 +29,6 @@ public class ShellTerminalComponent extends AbstractShellComponent {
     private final String ERROR_MESSAGE = "\033[0;31m";
     private final String BOLD = "\033[1m";
     private final String RESET = "\033[0m";
-
-    public ShellTerminalComponent(Terminal terminal) {
-        this.terminal = terminal;
-    }
 
     public void printSuccessMessage(String text) {
         StringBuilder msg = new StringBuilder();

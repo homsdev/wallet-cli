@@ -12,7 +12,10 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.Table;
 
+import com.homsdev.account_manager_cli.command.ui.ConfirmationInputComponent;
+import com.homsdev.account_manager_cli.command.ui.InputReadComponent;
 import com.homsdev.account_manager_cli.command.ui.ItemSelectorUI;
+import com.homsdev.account_manager_cli.command.ui.MessageDisplayComponent;
 import com.homsdev.account_manager_cli.enums.MenuOperation;
 import com.homsdev.account_manager_cli.model.Account;
 import com.homsdev.account_manager_cli.model.TRANSACTION_TYPE;
@@ -36,10 +39,13 @@ public class TransactionCommands {
 
     private final ShellTerminalComponent terminalComponent;
     private final ItemSelectorUI itemSelectorUI;
+    private final ConfirmationInputComponent confirmationInputUI;
+    private final InputReadComponent inputReadUI;
+    private final MessageDisplayComponent displayUI;
 
     @ShellMethod(key = "save-t", value = "Register a new transaction")
     public void registerTransaction() {
-        // Selecting account
+ 
         List<Account> userAccounts = accountService.getAllAccounts();
 
         LinkedHashMap<String, String> options = new LinkedHashMap<>();
@@ -50,13 +56,10 @@ public class TransactionCommands {
 
         String selectedAccount = terminalComponent.readMultipleSelectionInput("Select account", options);
 
-        // Capture transaction alias
         String description = terminalComponent.readSimpleTextInput("Capture description", "<<empty>>");
 
-        // Capture transaction amount
         String transactionAmount = terminalComponent.readSimpleTextInput("Capture transaction amount", "0.00");
 
-        // Select transaction type
         LinkedHashMap<String, String> transactionTypeItems = new LinkedHashMap<>();
         transactionTypeItems.put(TRANSACTION_TYPE.EXPENSE.toString(), "Expense");
         transactionTypeItems.put(TRANSACTION_TYPE.INCOME.toString(), "Income");
@@ -64,13 +67,11 @@ public class TransactionCommands {
         String selectedType = terminalComponent.readMultipleSelectionInput("Select transaction type",
                 transactionTypeItems);
 
-        // Capture transaction date
         LocalDate transactionDate = null;
         while (transactionDate == null) {
             transactionDate = terminalComponent.readDateTypeInput("Capture date").orElse(null);
         }
 
-        // Generate UUID
         String transactionId = UUID.randomUUID().toString();
 
         Account account = Account.builder().accountId(selectedAccount).build();
@@ -152,11 +153,13 @@ public class TransactionCommands {
         Table filteredTransactionsTable = TableUtils.transactionTable(filteredTransactions.toArray(new Transaction[0]));
 
         terminalComponent.printInfoMessage(filteredTransactionsTable.render(SCREEN_SIZE));
+        
         if (filteredTransactions.size() > 0) {
             Transaction selectedTransaction = itemSelectorUI.transactionItemSelector(filteredTransactions);
             terminalComponent
                     .printInfoMessage(String.format("Operating on transaction %s", selectedTransaction.getAlias()));
             MenuOperation selectedOperation = itemSelectorUI.operationItemSelector();
+            
             executeOperation(selectedOperation, selectedTransaction);
         }
 
@@ -191,7 +194,34 @@ public class TransactionCommands {
     }
 
     private void updateTransaction(Transaction transaction) {
-        terminalComponent.printInfoMessage(String.format("Updating transaction: ", transaction.getAlias()));
+        BigDecimal updatedAmount = transaction.getAmount();
+        TRANSACTION_TYPE updatedType = transaction.getType();
+        LocalDate updatedDate = transaction.getDate();
+
+        Boolean isUpdateAmount = confirmationInputUI.readUserConfirmation(false, "Update Amount?");
+        if (isUpdateAmount) {
+            updatedAmount = new BigDecimal(inputReadUI.readSimpleTextInput("Capture new amount:",
+                    transaction.getAmount().toString()));
+        }
+
+        Boolean isUpdateType = confirmationInputUI.readUserConfirmation(false, "update type [EXPENSE,INCOME]?");
+        if (isUpdateType) {
+            updatedType = itemSelectorUI.transactionTypeSelector();
+        }
+
+        Boolean isUpdateDate = confirmationInputUI.readUserConfirmation(false, "update date?");
+
+        if (isUpdateDate) {
+            updatedDate = inputReadUI.readDateTypeInput("Update transaction date:").orElseGet(LocalDate::now);
+        }
+
+        transaction.setAmount(updatedAmount);
+        transaction.setType(updatedType);
+        transaction.setDate(updatedDate);
+
+        Transaction updatedTransaction = transactionService.updateTransaction(transaction);
+
+        displayUI.printSuccessMessage("Transaction Updated Successfully");
 
     }
 

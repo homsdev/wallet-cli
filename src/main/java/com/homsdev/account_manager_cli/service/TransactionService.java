@@ -18,7 +18,6 @@ import com.homsdev.account_manager_cli.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -30,6 +29,7 @@ public class TransactionService {
     /**
      * Saves new transaction to database and updates vinculated account balance
      * according to newly transaction amount and type
+     * 
      * @param transaction transaction POJO with info to be persisted
      * @return transaction POJO if info persisted OK
      */
@@ -61,7 +61,8 @@ public class TransactionService {
 
     /**
      * Finds all transactions vinculated to given account id
-     * @param accountId 
+     * 
+     * @param accountId
      * @return List of the account related transactions
      */
     public List<Transaction> findAllByAccountId(String accountId) {
@@ -70,6 +71,7 @@ public class TransactionService {
 
     /**
      * Find an specific transaction by provided id
+     * 
      * @param transactionId
      * @return Finded transaction if exists
      * @throws ResourceNotFoundException if transaction does not exists
@@ -96,18 +98,18 @@ public class TransactionService {
         BigDecimal vinculatedAccountBalance = vinculatedAccount.getBalance();
 
         if (originalTransaction.getType() == TRANSACTION_TYPE.EXPENSE) {
-            vinculatedAccountBalance.add(originalTransaction.getAmount());
+            vinculatedAccountBalance = vinculatedAccountBalance.add(originalTransaction.getAmount());
         } else if (originalTransaction.getType() == TRANSACTION_TYPE.INCOME) {
-            vinculatedAccountBalance.subtract(originalTransaction.getAmount());
+            vinculatedAccountBalance = vinculatedAccountBalance.subtract(originalTransaction.getAmount());
         }
 
         Transaction updatedTransaction = transactionRepository.updateTransaction(transaction)
                 .orElseThrow(() -> new ResourceNotUpdatedException("Transaction was not updated"));
 
         if (updatedTransaction.getType() == TRANSACTION_TYPE.EXPENSE) {
-            vinculatedAccountBalance.subtract(updatedTransaction.getAmount());
+            vinculatedAccountBalance = vinculatedAccountBalance.subtract(updatedTransaction.getAmount());
         } else if (updatedTransaction.getType() == TRANSACTION_TYPE.INCOME) {
-            vinculatedAccountBalance.add(updatedTransaction.getAmount());
+            vinculatedAccountBalance = vinculatedAccountBalance.add(updatedTransaction.getAmount());
         }
 
         vinculatedAccount.setBalance(vinculatedAccountBalance);
@@ -117,7 +119,6 @@ public class TransactionService {
 
         return updatedTransaction;
     }
-
 
     /**
      * Deletes specific transaction by provided id
@@ -156,7 +157,7 @@ public class TransactionService {
     }
 
     /**
-     * Filters transactions vinculated to provided account id by current month 
+     * Filters transactions vinculated to provided account id by current month
      * @param accountId
      * @return
      */
