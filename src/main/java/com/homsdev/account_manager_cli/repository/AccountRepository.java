@@ -10,4 +10,5 @@ public interface AccountRepository {
     Optional<Account> saveAccount(Account account);
     Integer deleteAccount(String accountId);
     Optional<Account> updateBalance(Account account);
+    Optional<Account> findById(String id);
 }

@@ -12,7 +12,7 @@ import com.homsdev.account_manager_cli.model.Account;
 public class AccountRowMapper implements RowMapper<Account> {
 
     @Override
-    public Account mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public Account mapRow(@SuppressWarnings("null") ResultSet rs, int rowNum) throws SQLException {
         return Account.builder()
                 .accountId(rs.getString("account_id"))
                 .balance(rs.getBigDecimal("balance"))
